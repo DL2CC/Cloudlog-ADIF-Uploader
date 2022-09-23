@@ -30,7 +30,12 @@ CL_STA_PROF = 1
 def convert_records_to_adif(records_to_convert):
     """Crude ADIF generator"""
     adif_str = ""
-    for rec in records_to_convert: # loop records
+   
+# go backwards in case your ADIF contains changes, thus use the last line in the file for the QSO
+# e.g. UCXLog writes edits to QSOs at the end of the yearly ADIF file
+# if this is is not wanted, just remove the reversed(
+
+for rec in reversed(records_to_convert): # loop records
         for itm, val in rec.items(): # loop record fields
             if itm != 't': # don't convert datetime timestamp
                 l = len(val) # find adif field length
@@ -41,6 +46,9 @@ def convert_records_to_adif(records_to_convert):
 def upload_to_cloudlog(adif_to_upload):
     """ADI details here: https://github.com/magicbug/Cloudlog/wiki/API"""
     payload = {"key":CL_API_KEY, "station_profile_id":CL_STA_PROF, "type":"adif", "string":adif_to_upload}
+
+    # check if your URL is with /Cloudlog in the path, if not remove it
+    
     r = requests.post("%s/Cloudlog/index.php/api/qso/" % (CL_SERVER), json=payload)
     return r
 
